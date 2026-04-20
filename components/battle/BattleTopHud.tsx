@@ -1,14 +1,15 @@
+import { BF_COLORS } from '@/lib/design-tokens';
+
 interface BattleTopHudProps {
   zel: number;
   gems: number;
   turnCount?: number;
   battlePhase?: 'player_input' | 'player_executing' | 'enemy_executing' | 'victory' | 'defeat';
   onMenuClick?: () => void;
+  menuLabel?: string;
 }
 
-import { BF_COLORS } from '@/lib/design-tokens';
-
-export function BattleTopHud({ zel, gems, turnCount = 1, battlePhase = 'player_input', onMenuClick }: BattleTopHudProps) {
+export function BattleTopHud({ zel, gems, turnCount = 1, battlePhase = 'player_input', onMenuClick, menuLabel = 'MENU' }: BattleTopHudProps) {
   const phaseColors: Record<string, string> = {
     player_input: '#22c55e',
     player_executing: '#eab308',
@@ -71,7 +72,7 @@ export function BattleTopHud({ zel, gems, turnCount = 1, battlePhase = 'player_i
           border: `1px solid ${BF_COLORS.gold.dim}`
         }}
       >
-        MENU
+        {menuLabel}
       </button>
     </div>
   );

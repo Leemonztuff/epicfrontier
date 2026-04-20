@@ -3,6 +3,7 @@ import WorldMap from './WorldMap';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Header, Card, Tabs } from './ui/DesignSystem';
+import { ElementalGuide } from './ui/ElementalGuide';
 
 type ViewMode = 'map' | 'list';
 
@@ -108,6 +109,7 @@ export default function QuestScreen({ onStartBattle, onBack, completedStages }: 
 }) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [activeRegion, setActiveRegion] = useState('All');
+  const [showElementGuide, setShowElementGuide] = useState(false);
   const safeCompletedStages = completedStages || [];
   
   const regions = ['All', ...Array.from(new Set(STAGES.map(s => s.area.split(' ')[0])))];
@@ -133,6 +135,12 @@ export default function QuestScreen({ onStartBattle, onBack, completedStages }: 
           activeTab={viewMode}
           onTabChange={(id) => setViewMode(id as ViewMode)}
         />
+        <button
+          onClick={() => setShowElementGuide(true)}
+          className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-xs font-bold uppercase tracking-wider text-zinc-300 hover:text-white"
+        >
+          Element Guide
+        </button>
       </div>
 
       <div className="flex-1 p-4 overflow-y-auto">
@@ -184,6 +192,7 @@ export default function QuestScreen({ onStartBattle, onBack, completedStages }: 
           )}
         </AnimatePresence>
       </div>
+      <ElementalGuide isOpen={showElementGuide} onClose={() => setShowElementGuide(false)} />
     </div>
   );
 }

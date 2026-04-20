@@ -8,6 +8,8 @@ import { BattleArena } from '@/components/battle/BattleArena';
 import { BattleBottomGrid } from '@/components/battle/BattleBottomGrid';
 import { BattleControlsBar } from '@/components/battle/BattleControlsBar';
 import { BattleStateData } from '@/components/battle/BattleArena';
+import { ElementalGuide } from '@/components/ui/ElementalGuide';
+import { useState } from 'react';
 
 interface BattleScreenProps {
   state: PlayerState;
@@ -18,6 +20,7 @@ interface BattleScreenProps {
 
 export default function BattleScreen({ state, stageId, onEnd }: BattleScreenProps) {
   const stage = STAGES.find(s => s.id === stageId);
+  const [showElementGuide, setShowElementGuide] = useState(false);
 
   const {
     playerUnits,
@@ -62,6 +65,8 @@ export default function BattleScreen({ state, stageId, onEnd }: BattleScreenProp
         gems={0}
         turnCount={turnCount}
         battlePhase={turnState}
+        onMenuClick={() => setShowElementGuide(true)}
+        menuLabel="ELEMENT"
       />
 
       {/* Battle Arena - takes most space */}
@@ -77,6 +82,8 @@ export default function BattleScreen({ state, stageId, onEnd }: BattleScreenProp
 
       {/* Control Bar - minimal ~50px */}
       <BattleControlsBar battleState={controlsData} />
+
+      <ElementalGuide isOpen={showElementGuide} onClose={() => setShowElementGuide(false)} />
     </div>
   );
 }
