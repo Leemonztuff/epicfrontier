@@ -101,13 +101,14 @@ function RegionTabs({ regions, activeRegion, onSelect }: {
   );
 }
 
-export default function QuestScreen({ onStartBattle, onBack }: { 
+export default function QuestScreen({ onStartBattle, onBack, completedStages }: { 
   onStartBattle: (stageId: number) => void, 
-  onBack?: () => void 
+  onBack?: () => void,
+  completedStages?: number[]
 }) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [activeRegion, setActiveRegion] = useState('All');
-  const [completedStages, setCompletedStages] = useState<number[]>([]);
+  const safeCompletedStages = completedStages || [];
   
   const regions = ['All', ...Array.from(new Set(STAGES.map(s => s.area.split(' ')[0])))];
   
@@ -145,7 +146,7 @@ export default function QuestScreen({ onStartBattle, onBack }: {
               className="h-full"
             >
               <WorldMap 
-                completedStages={completedStages} 
+                completedStages={safeCompletedStages} 
                 onSelectStage={handleSelectStage} 
               />
             </motion.div>
@@ -165,8 +166,8 @@ export default function QuestScreen({ onStartBattle, onBack }: {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {filteredStages.map(stage => {
-                  const isUnlocked = stage.id === 1 || completedStages.includes(stage.id - 1);
-                  const isCompleted = completedStages.includes(stage.id);
+                  const isUnlocked = stage.id === 1 || safeCompletedStages.includes(stage.id - 1);
+                  const isCompleted = safeCompletedStages.includes(stage.id);
                   
                   return (
                     <StageCard

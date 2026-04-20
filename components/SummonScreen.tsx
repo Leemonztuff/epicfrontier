@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PlayerState } from '@/lib/gameState';
 import { UNIT_DATABASE, UnitTemplate } from '@/lib/gameData';
 import { GACHA_CONFIG } from '@/lib/economyData';
@@ -81,6 +81,15 @@ export default function SummonScreen({ state, rollGacha, onAlert, onBack }: {
   const [summonResult, setSummonResult] = useState<UnitTemplate | null>(null);
   const [phase, setPhase] = useState<SummonPhase>('idle');
   const [isShaking, setIsShaking] = useState(false);
+  const shakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+      if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+    };
+  }, []);
 
   const handleSummon = async () => {
     if (phase !== 'idle') return;
@@ -109,12 +118,14 @@ export default function SummonScreen({ state, rollGacha, onAlert, onBack }: {
     setPhase('gate');
     
     // Start shaking after the door appears
-    setTimeout(() => setIsShaking(true), 800);
+    if (shakeTimerRef.current) clearTimeout(shakeTimerRef.current);
+    shakeTimerRef.current = setTimeout(() => setIsShaking(true), 800);
     
     // High rarity gets a longer, more dramatic buildup
     const gateDuration = rarity >= 5 ? 4000 : 2500;
     
-    setTimeout(() => {
+    if (revealTimerRef.current) clearTimeout(revealTimerRef.current);
+    revealTimerRef.current = setTimeout(() => {
       setIsShaking(false);
       setPhase('reveal');
     }, gateDuration);

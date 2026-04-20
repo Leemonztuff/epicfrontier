@@ -166,6 +166,10 @@ export function useGameState(options: UseGameStateOptions = {}) {
     if (!migrated.summonPity) {
       migrated.summonPity = INITIAL_STATE.summonPity;
     }
+
+    if (!Array.isArray(migrated.completedStageIds)) {
+      migrated.completedStageIds = [];
+    }
     
     if (!migrated.qrState?.lifetimeScans) {
       migrated.qrState = { ...INITIAL_STATE.qrState, ...migrated.qrState, lifetimeScans: migrated.qrState?.scansToday || 0 };
@@ -696,6 +700,9 @@ export function useGameState(options: UseGameStateOptions = {}) {
         zel: prev.zel + zelReward,
         exp: newPlayerExp,
         playerLevel: newPlayerLevel,
+        completedStageIds: prev.completedStageIds.includes(stageId)
+          ? prev.completedStageIds
+          : [...prev.completedStageIds, stageId],
         arenaScore: (prev.arenaScore || 0) + arenaScoreGain,
         energy: playerLeveledUp ? prev.maxEnergy : prev.energy,
         inventory: newInventory,

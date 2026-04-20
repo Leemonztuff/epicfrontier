@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useGameState } from '@/lib/gameState';
 import type { SummonResult, UnitInstance } from '@/lib/gameState';
 import { BattleRewards } from '@/components/BattleRewardsModal';
@@ -58,6 +58,8 @@ export function useGameApp(userId?: string | null) {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [battleRewards, setBattleRewards] = useState<BattleRewards | null>(null);
 
+  const battleStartInFlightRef = useRef(false);
+  const battleEndInFlightRef = useRef(false);
   const useServerEngine = Boolean(userId);
 
   const triggerAlert = useCallback((message: string) => {
@@ -69,31 +71,38 @@ export function useGameApp(userId?: string | null) {
   const startBattle = useCallback(
     (stageId: number) => {
       const run = async () => {
-        const stage = STAGES.find(s => s.id === stageId);
-        if (!stage) return;
+        if (battleStartInFlightRef.current) return;
+        battleStartInFlightRef.current = true;
 
-        const energyCost = stage.energy ?? 1;
-        let success = false;
+        try {
+          const stage = STAGES.find(s => s.id === stageId);
+          if (!stage) return;
 
-        if (useServerEngine) {
-          const rpc = await rpcSpendEnergy(energyCost);
-          if (rpc.ok) {
-            success = true;
-            if (typeof rpc.energy === 'number') {
-              updateState({ energy: rpc.energy });
+          const energyCost = stage.energy ?? 1;
+          let success = false;
+
+          if (useServerEngine) {
+            const rpc = await rpcSpendEnergy(energyCost);
+            if (rpc.ok) {
+              success = true;
+              if (typeof rpc.energy === 'number') {
+                updateState({ energy: rpc.energy });
+              }
             }
           }
-        }
 
-        if (!success) {
-          success = spendEnergy(energyCost);
-        }
+          if (!success) {
+            success = spendEnergy(energyCost);
+          }
 
-        if (success) {
-          setBattleStage(stageId);
-          setCurrentScreen('battle');
-        } else {
-          triggerAlert(`Not enough energy! You need ${energyCost} ⚡ to start this quest.`);
+          if (success) {
+            setBattleStage(stageId);
+            setCurrentScreen('battle');
+          } else {
+            triggerAlert(`Not enough energy! You need ${energyCost} energy to start this quest.`);
+          }
+        } finally {
+          battleStartInFlightRef.current = false;
         }
       };
 
@@ -106,54 +115,61 @@ export function useGameApp(userId?: string | null) {
     (victory: boolean) => {
       const completedStageId = battleStage;
       const run = async () => {
-        if (completedStageId === null) {
+        if (battleEndInFlightRef.current) return;
+        battleEndInFlightRef.current = true;
+
+        try {
+          if (completedStageId === null) {
+            setCurrentScreen('home');
+            setBattleStage(null);
+            return;
+          }
+
+          const stage = STAGES.find(s => s.id === completedStageId);
+          const stageCode = `stage_${String(completedStageId).padStart(3, '0')}`;
+          let handledByServer = false;
+
+          if (useServerEngine) {
+            const rpc = await rpcFinishBattle(stageCode, victory);
+            if (rpc.ok) {
+              handledByServer = true;
+              if (victory) {
+                const zelReward = rpc.zel_reward || 0;
+                const expReward = rpc.exp_reward || 0;
+
+                updateState({
+                  zel: gameState.state.zel + zelReward,
+                  exp: gameState.state.exp + expReward,
+                });
+
+                setBattleRewards({
+                  zel: zelReward,
+                  exp: expReward,
+                  playerLeveledUp: false,
+                  leveledUpUnits: [],
+                  equipmentDropped: [],
+                  arenaScoreGain: 0,
+                });
+              }
+            }
+          }
+
+          if (!handledByServer) {
+            if (victory) {
+              const rewards = winBattle(completedStageId);
+              if (rewards) {
+                setBattleRewards(rewards);
+              }
+            } else if (stage) {
+              refundEnergy(stage.energy);
+            }
+          }
+
           setCurrentScreen('home');
           setBattleStage(null);
-          return;
+        } finally {
+          battleEndInFlightRef.current = false;
         }
-
-        const stage = STAGES.find(s => s.id === completedStageId);
-        const stageCode = `stage_${String(completedStageId).padStart(3, '0')}`;
-        let handledByServer = false;
-
-        if (useServerEngine) {
-          const rpc = await rpcFinishBattle(stageCode, victory);
-          if (rpc.ok) {
-            handledByServer = true;
-            if (victory) {
-              const zelReward = rpc.zel_reward || 0;
-              const expReward = rpc.exp_reward || 0;
-
-              updateState({
-                zel: gameState.state.zel + zelReward,
-                exp: gameState.state.exp + expReward,
-              });
-
-              setBattleRewards({
-                zel: zelReward,
-                exp: expReward,
-                playerLeveledUp: false,
-                leveledUpUnits: [],
-                equipmentDropped: [],
-                arenaScoreGain: 0,
-              });
-            }
-          }
-        }
-
-        if (!handledByServer) {
-          if (victory) {
-            const rewards = winBattle(completedStageId);
-            if (rewards) {
-              setBattleRewards(rewards);
-            }
-          } else if (stage) {
-            refundEnergy(stage.energy);
-          }
-        }
-
-        setCurrentScreen('home');
-        setBattleStage(null);
       };
 
       void run();

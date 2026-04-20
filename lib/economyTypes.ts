@@ -492,6 +492,7 @@ export interface PlayerState {
   inventory: UnitInstance[];
   equipmentInventory: EquipInstance[];
   team: (string | null)[]; // 7 slots (BF style)
+  completedStageIds: number[]; // Quest progression (persistent unlocks)
   
   // Summon System
   summonPity: SummonPity;
@@ -664,6 +665,7 @@ export const INITIAL_STATE: PlayerState = {
   createdAt: Date.now(),
   lastPlayedAt: Date.now(),
   team: ['inst_1', 'inst_2', null, null, null, null, null],
+  completedStageIds: [],
 };
 
 // ============================================================================

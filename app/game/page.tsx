@@ -197,7 +197,13 @@ export default function GameApp() {
           />
         );
       case 'quest':
-        return <QuestScreen onStartBattle={handleStartBattle} onBack={goBack} />;
+        return (
+          <QuestScreen
+            onStartBattle={handleStartBattle}
+            onBack={goBack}
+            completedStages={state.completedStageIds}
+          />
+        );
       case 'shop':
         return (
           <ShopScreen

@@ -7,9 +7,7 @@ import { BattleTopHud } from '@/components/battle/BattleTopHud';
 import { BattleArena } from '@/components/battle/BattleArena';
 import { BattleBottomGrid } from '@/components/battle/BattleBottomGrid';
 import { BattleControlsBar } from '@/components/battle/BattleControlsBar';
-import { useCallback } from 'react';
 import { BattleStateData } from '@/components/battle/BattleArena';
-import { BattleUnit } from '@/lib/battleTypes';
 
 interface BattleScreenProps {
   state: PlayerState;
@@ -18,16 +16,8 @@ interface BattleScreenProps {
   onBack?: () => void;
 }
 
-export default function BattleScreen({ state, stageId, onEnd, onBack }: BattleScreenProps) {
+export default function BattleScreen({ state, stageId, onEnd }: BattleScreenProps) {
   const stage = STAGES.find(s => s.id === stageId);
-
-  const handleVictory = useCallback(() => {
-    setTimeout(() => onEnd(true), 2000);
-  }, [onEnd]);
-
-  const handleDefeat = useCallback(() => {
-    setTimeout(() => onEnd(false), 2000);
-  }, [onEnd]);
 
   const {
     playerUnits,
@@ -42,10 +32,7 @@ export default function BattleScreen({ state, stageId, onEnd, onBack }: BattleSc
     inventoryItems,
     selectedItem,
     setSelectedItem,
-  } = useBattle(state, stageId, (victory) => {
-    if (victory) handleVictory();
-    else handleDefeat();
-  });
+  } = useBattle(state, stageId, onEnd);
 
   const battleState: BattleStateData = {
     playerUnits,

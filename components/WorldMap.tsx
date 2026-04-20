@@ -29,7 +29,7 @@ const LAYOUT = [
   { x: 80, y: 55 }, { x: 60, y: 50 }, // Glast Heim
   { x: 40, y: 55 }, { x: 25, y: 45 }, { x: 15, y: 30 }, { x: 30, y: 20 }, // Tower
   { x: 50, y: 25 }, { x: 70, y: 30 }, { x: 85, y: 20 }, { x: 80, y: 10 }, { x: 60, y: 13 }, { x: 40, y: 10 }, // Niflheim
-  { x: 20, y: 15 }, { x: 35, y: 8 }, { x: 55, y: 5 } // Wolf Pack (stages 16-18)
+  { x: 20, y: 15 }, { x: 35, y: 8 }, { x: 55, y: 5 } // Wolf Pack (stages 17-19)
 ];
 
 const COLORS: Record<string, string> = {
@@ -42,7 +42,10 @@ const COLORS: Record<string, string> = {
   'Wolf Pack': 'from-amber-700 to-orange-800',
 };
 
-const MAP_NODES: MapNode[] = STAGES.filter(s => s.id <= 16).map((stage, idx) => ({
+const MAP_NODES: MapNode[] = STAGES
+  .filter(s => s.id <= 19)
+  .sort((a, b) => a.id - b.id)
+  .map((stage, idx) => ({
   id: stage.id,
   name: stage.name,
   area: stage.area,
@@ -55,7 +58,7 @@ const MAP_NODES: MapNode[] = STAGES.filter(s => s.id <= 16).map((stage, idx) => 
   energy: stage.energy
 }));
 
-const MAP_PATHS = Array.from({length: 15}, (_, i) => ({ from: i + 1, to: i + 2 }));
+const MAP_PATHS = Array.from({ length: Math.max(MAP_NODES.length - 1, 0) }, (_, i) => ({ fromIndex: i, toIndex: i + 1 }));
 
 // Generic background styles based on region
 const REGIONS = {
@@ -85,8 +88,9 @@ export default function WorldMap({ completedStages, onSelectStage }: WorldMapPro
 
       {/* Connection paths */}
       {MAP_PATHS.map((path, i) => {
-        const fromNode = MAP_NODES.find(n => n.id === path.from)!;
-        const toNode = MAP_NODES.find(n => n.id === path.to)!;
+        const fromNode = MAP_NODES[path.fromIndex];
+        const toNode = MAP_NODES[path.toIndex];
+        if (!fromNode || !toNode) return null;
         const isActive = fromNode.isUnlocked || (completedStages.includes(fromNode.id));
         
         return (

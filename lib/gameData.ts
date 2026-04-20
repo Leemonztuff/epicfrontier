@@ -654,9 +654,9 @@ export const STAGES: StageTemplate[] = [
   // ============================================================================
   // WOLF REGION - Wolf Pack hunting grounds
   // ============================================================================
-  { id: 16, name: "Wolf Pack", area: "Northern Wilds", energy: 7, description: "Territory of the fierce wolf packs.", enemies: ['wolf_scout', 'wolf_scout', 'wolf_hunter'], expReward: 600, zelReward: 2500, equipmentDrops: [], equipmentDropChance: 0.4, isWolfStage: true },
-  { id: 17, name: "Wolf Pack", area: "Wolf Den", energy: 9, description: "The Alpha's domain.", enemies: ['wolf_hunter', 'wolf_alpha', 'wolf_scout'], expReward: 1000, zelReward: 4500, equipmentDrops: [], equipmentDropChance: 0.5, isWolfStage: true },
-  { id: 18, name: "Wolf Pack", area: "Blood Moon Peak", energy: 12, description: "Where the Blood Moon wolves hunt.", enemies: ['wolf_shadow', 'wolf_blood_moon', 'wolf_hunter'], expReward: 2000, zelReward: 8000, equipmentDrops: [], equipmentDropChance: 0.7, isWolfStage: true, isNightStage: true },
+  { id: 17, name: "Wolf Pack", area: "Northern Wilds", energy: 7, description: "Territory of the fierce wolf packs.", enemies: ['wolf_scout', 'wolf_scout', 'wolf_hunter'], expReward: 600, zelReward: 2500, equipmentDrops: [], equipmentDropChance: 0.4, isWolfStage: true },
+  { id: 18, name: "Wolf Pack", area: "Wolf Den", energy: 9, description: "The Alpha's domain.", enemies: ['wolf_hunter', 'wolf_alpha', 'wolf_scout'], expReward: 1000, zelReward: 4500, equipmentDrops: [], equipmentDropChance: 0.5, isWolfStage: true },
+  { id: 19, name: "Wolf Pack", area: "Blood Moon Peak", energy: 12, description: "Where the Blood Moon wolves hunt.", enemies: ['wolf_shadow', 'wolf_blood_moon', 'wolf_hunter'], expReward: 2000, zelReward: 8000, equipmentDrops: [], equipmentDropChance: 0.7, isWolfStage: true, isNightStage: true },
 
   // Region 5: Niflheim (dungeon gates) - Back to easier stages for variety
   { id: 11, name: "Niflheim", area: "Nifflheim Gate", energy: 5, description: "The realm of the dead beckons.", enemies: ['e5', 'e6', 'e7'], expReward: 800, zelReward: 3000, equipmentDrops: ['eq_w2'], equipmentDropChance: 0.5 },
