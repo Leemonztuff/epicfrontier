@@ -58,8 +58,9 @@ export default function GameApp() {
     };
   }, []);
 
-  const effectiveUserId = user ? user.id : (skippedAuth ? 'guest' : undefined);
-  
+  // Guest mode should remain fully local to avoid unauthenticated RPC/REST calls.
+  const effectiveUserId = user ? user.id : undefined;
+
   const {
     gameState,
     isLoaded,

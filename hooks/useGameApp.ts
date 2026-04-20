@@ -60,7 +60,21 @@ export function useGameApp(userId?: string | null) {
 
   const battleStartInFlightRef = useRef(false);
   const battleEndInFlightRef = useRef(false);
-  const useServerEngine = Boolean(userId);
+  const serverEngineDisabledRef = useRef(false);
+  const useServerEngine = Boolean(userId && userId !== 'guest');
+
+  const shouldDisableServerEngine = (reason?: string): boolean => {
+    if (!reason) return false;
+    const normalized = reason.toLowerCase();
+    return (
+      normalized.includes('not_authenticated') ||
+      normalized.includes('pgrst') ||
+      normalized.includes('404') ||
+      normalized.includes('function') ||
+      normalized.includes('schema cache') ||
+      normalized.includes('relation')
+    );
+  };
 
   const triggerAlert = useCallback((message: string) => {
     setAlertMessage(message);
@@ -81,13 +95,15 @@ export function useGameApp(userId?: string | null) {
           const energyCost = stage.energy ?? 1;
           let success = false;
 
-          if (useServerEngine) {
+          if (useServerEngine && !serverEngineDisabledRef.current) {
             const rpc = await rpcSpendEnergy(energyCost);
             if (rpc.ok) {
               success = true;
               if (typeof rpc.energy === 'number') {
                 updateState({ energy: rpc.energy });
               }
+            } else if (shouldDisableServerEngine(rpc.reason)) {
+              serverEngineDisabledRef.current = true;
             }
           }
 
@@ -129,7 +145,7 @@ export function useGameApp(userId?: string | null) {
           const stageCode = `stage_${String(completedStageId).padStart(3, '0')}`;
           let handledByServer = false;
 
-          if (useServerEngine) {
+          if (useServerEngine && !serverEngineDisabledRef.current) {
             const rpc = await rpcFinishBattle(stageCode, victory);
             if (rpc.ok) {
               handledByServer = true;
@@ -151,6 +167,8 @@ export function useGameApp(userId?: string | null) {
                   arenaScoreGain: 0,
                 });
               }
+            } else if (shouldDisableServerEngine(rpc.reason)) {
+              serverEngineDisabledRef.current = true;
             }
           }
 
@@ -219,7 +237,7 @@ export function useGameApp(userId?: string | null) {
     async (bannerId: string, count: number = 1): Promise<SummonResult[]> => {
       const serverBannerId = bannerId === 'standard' && count === 10 ? 'standard_multi' : 'standard_single';
 
-      if (useServerEngine) {
+      if (useServerEngine && !serverEngineDisabledRef.current) {
         const rpc = await rpcSummon(serverBannerId);
         if (rpc.ok && rpc.results?.length) {
           const current = gameState.state;
@@ -258,6 +276,8 @@ export function useGameApp(userId?: string | null) {
             prismValue: 0,
             zelValue: 0,
           }));
+        } else if (shouldDisableServerEngine(rpc.reason)) {
+          serverEngineDisabledRef.current = true;
         }
       }
 

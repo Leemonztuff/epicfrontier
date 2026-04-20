@@ -16,6 +16,7 @@ import {
   GachaBanner,
   CraftRecipe,
   MATERIAL_CONFIG,
+  getWeekStart,
 } from './economyTypes';
 import {
   ENERGY_CONFIG,
@@ -389,12 +390,12 @@ export function useGameState(options: UseGameStateOptions = {}) {
       canAfford = prev.energy >= amount;
       
       if (canAfford) {
-        console.log(`[spendEnergy] ✅ SPEND: ${prev.energy} - ${amount} = ${prev.energy - amount}`);
+        console.log(`[spendEnergy] SPEND: ${prev.energy} - ${amount} = ${prev.energy - amount}`);
         // Update ref for external access
         energyResultRef.current = { success: true, energy: prev.energy - amount };
         return { ...prev, energy: prev.energy - amount };
       }
-      console.log(`[spendEnergy] ❌ NOT ENOUGH: have ${prev.energy}, need ${amount}`);
+      console.log(`[spendEnergy] NOT_ENOUGH: have ${prev.energy}, need ${amount}`);
       // Update ref for external access
       energyResultRef.current = { success: false, energy: prev.energy };
       return prev;
